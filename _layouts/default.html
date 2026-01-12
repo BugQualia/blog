@@ -5,29 +5,274 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ page.title | default: site.title }}</title>
     <style>
+      :root {
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         line-height: 1.6;
-        margin: 2rem auto;
-        max-width: 680px;
-        padding: 0 1rem;
+        margin: 0;
+        min-height: 100vh;
         color: #1f2937;
       }
+
       a { color: #2563eb; }
-      header { margin-bottom: 2rem; }
-      footer { margin-top: 3rem; font-size: 0.9rem; color: #6b7280; }
+
+      .layout {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: clamp(220px, 25vw, 360px);
+        min-width: 180px;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        background: #f9fafb;
+      }
+
+      .sidebar-pane {
+        overflow: auto;
+        padding: 1rem;
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .sidebar-pane h2 {
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0 0 0.75rem;
+        color: #6b7280;
+      }
+
+      .sidebar-divider {
+        height: 6px;
+        background: #e5e7eb;
+        cursor: row-resize;
+      }
+
+      .tree {
+        font-size: 0.95rem;
+      }
+
+      .tree summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .tree summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .tree summary::before {
+        content: "▾";
+        display: inline-block;
+        margin-right: 0.4rem;
+        color: #6b7280;
+      }
+
+      .tree[open] summary::before {
+        content: "▾";
+      }
+
+      .tree:not([open]) summary::before {
+        content: "▸";
+      }
+
+      .tree ul {
+        list-style: none;
+        padding-left: 1.2rem;
+        margin: 0.5rem 0 0;
+      }
+
+      .tree li {
+        margin-bottom: 0.35rem;
+      }
+
+      .tree a {
+        text-decoration: none;
+        color: #374151;
+      }
+
+      .tree a:hover {
+        color: #111827;
+      }
+
+      .outline {
+        font-size: 0.9rem;
+      }
+
+      .outline ul {
+        list-style: none;
+        padding-left: 0.8rem;
+        margin: 0;
+      }
+
+      .outline li {
+        margin-bottom: 0.35rem;
+      }
+
+      .outline a {
+        text-decoration: none;
+        color: #4b5563;
+      }
+
+      .outline a:hover {
+        color: #111827;
+      }
+
+      .content {
+        flex: 1;
+        padding: 2rem 2.5rem;
+      }
+
+      .content article {
+        max-width: 720px;
+      }
+
+      footer {
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+
       code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 4px; }
+
+      .column-resizer {
+        width: 6px;
+        cursor: col-resize;
+        background: #e5e7eb;
+      }
+
+      @media (max-width: 800px) {
+        .layout {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          min-width: 0;
+          border-right: none;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .column-resizer {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
-    <header>
-      <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
-    </header>
-    <main>
-      {{ content }}
-    </main>
-    <footer>
-      Built with Markdown on GitHub Pages.
-    </footer>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <section class="sidebar-pane" id="posts-pane">
+          <h2>Posts</h2>
+          <details class="tree" open>
+            <summary>notes</summary>
+            <ul>
+              {% for post in site.posts %}
+                <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </details>
+        </section>
+        <div class="sidebar-divider" id="sidebar-divider" aria-hidden="true"></div>
+        <section class="sidebar-pane outline" id="outline-pane">
+          <h2>Outline</h2>
+          <div id="outline-list">No headings yet.</div>
+        </section>
+      </aside>
+      <div class="column-resizer" id="column-resizer" aria-hidden="true"></div>
+      <main class="content">
+        <article>
+          {{ content }}
+        </article>
+        <footer>
+          Built with Markdown on GitHub Pages.
+        </footer>
+      </main>
+    </div>
+    <script>
+      const outlineTarget = document.getElementById("outline-list");
+      const headings = Array.from(document.querySelectorAll("article h1, article h2, article h3"));
+      if (headings.length) {
+        const list = document.createElement("ul");
+        headings.forEach((heading, index) => {
+          if (!heading.id) {
+            heading.id = `section-${index}`;
+          }
+          const item = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = `#${heading.id}`;
+          link.textContent = heading.textContent;
+          item.appendChild(link);
+          list.appendChild(item);
+        });
+        outlineTarget.innerHTML = "";
+        outlineTarget.appendChild(list);
+      }
+
+      const sidebar = document.getElementById("sidebar");
+      const columnResizer = document.getElementById("column-resizer");
+      const sidebarDivider = document.getElementById("sidebar-divider");
+      const postsPane = document.getElementById("posts-pane");
+      const outlinePane = document.getElementById("outline-pane");
+
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+      columnResizer.addEventListener("pointerdown", (event) => {
+        document.body.style.cursor = "col-resize";
+        const startX = event.clientX;
+        const startWidth = sidebar.getBoundingClientRect().width;
+
+        const onMove = (moveEvent) => {
+          const delta = moveEvent.clientX - startX;
+          const nextWidth = clamp(startWidth + delta, 180, window.innerWidth * 0.6);
+          sidebar.style.width = `${nextWidth}px`;
+        };
+
+        const onUp = () => {
+          document.body.style.cursor = "";
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      });
+
+      sidebarDivider.addEventListener("pointerdown", (event) => {
+        document.body.style.cursor = "row-resize";
+        const startY = event.clientY;
+        const startHeight = postsPane.getBoundingClientRect().height;
+        const sidebarHeight = sidebar.getBoundingClientRect().height;
+
+        const onMove = (moveEvent) => {
+          const delta = moveEvent.clientY - startY;
+          const nextHeight = clamp(startHeight + delta, 120, sidebarHeight - 120);
+          postsPane.style.height = `${nextHeight}px`;
+          postsPane.style.flex = "0 0 auto";
+          outlinePane.style.flex = "1 1 auto";
+        };
+
+        const onUp = () => {
+          document.body.style.cursor = "";
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      });
+    </script>
   </body>
 </html>
