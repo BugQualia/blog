@@ -8,9 +8,9 @@ Welcome! This is a tiny, GitHub Pages-friendly blog built with Markdown and Jeky
 
 ## Posts
 
-- [Hello, world](./hello-world/)
-- [Second note](./second-note/)
-- [Tiny routine](./tiny-routine/)
+{% for post in site.posts %}
+- [{{ post.title }}]({{ post.url | relative_url }})
+{% endfor %}
 
 ---
 
