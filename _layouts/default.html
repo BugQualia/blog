@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ page.title | default: site.title }}</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+        margin: 2rem auto;
+        max-width: 680px;
+        padding: 0 1rem;
+        color: #1f2937;
+      }
+      a { color: #2563eb; }
+      header { margin-bottom: 2rem; }
+      footer { margin-top: 3rem; font-size: 0.9rem; color: #6b7280; }
+      code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    </header>
+    <main>
+      {{ content }}
+    </main>
+    <footer>
+      Built with Markdown on GitHub Pages.
+    </footer>
+  </body>
+</html>
