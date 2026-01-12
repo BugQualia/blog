@@ -1,0 +1,9 @@
+name: Minimal Markdown Blog
+url: ""
+baseurl: ""
+markdown: kramdown
+permalink: /:title/
+
+title: Minimal Markdown Blog
+
+collections: {}
